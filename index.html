@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-gray-900">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kraken ETH/USD Futures Chart</title>
+    <!-- Loading Tailwind CSS --><script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Using Inter font */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        .text-purple-400 { color: #9C27B0; }
+        .text-amber-400 { color: #FFC107; }
+
+        @keyframes pulse-green {
+            0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(52, 211, 153, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
+        }
+        .pulse-green { animation: pulse-green 2s infinite; }
+
+        @keyframes pulse-yellow {
+            0% { box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(250, 204, 21, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(250, 204, 21, 0); }
+        }
+        .pulse-yellow { animation: pulse-yellow 2s infinite; }
+
+        @keyframes pulse-orange {
+            0% { box-shadow: 0 0 0 0 rgba(251, 146, 60, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(251, 146, 60, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(251, 146, 60, 0); }
+        }
+        .pulse-orange { animation: pulse-orange 2s infinite; }
+
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(248, 113, 113, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(248, 113, 113, 0); }
+        }
+        .pulse-red { animation: pulse-red 2s infinite; }
+
+        @keyframes pulse-red-fast {
+            0% { box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(248, 113, 113, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(248, 113, 113, 0); }
+        }
+        .pulse-red-fast { animation: pulse-red-fast 1s infinite; }
+
+        @keyframes pulse-red-faster {
+            0% { box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(248, 113, 113, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(248, 113, 113, 0); }
+        }
+        .pulse-red-faster { animation: pulse-red-faster 0.5s infinite; }
+
+        @keyframes pulse-purple {
+            0% { box-shadow: 0 0 0 0 rgba(156, 39, 176, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(156, 39, 176, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(156, 39, 176, 0); }
+        }
+        .pulse-purple { animation: pulse-purple 0.5s infinite; }
+
+        .icon-red {
+            color: #F87171; /* Red */
+        }
+        .ripple-effect {
+            position: relative;
+        }
+        .ripple-effect::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background-color: transparent;
+            animation: ripple-outside 1.5s infinite;
+            transform: translate(-50%, -50%);
+        }
+        @keyframes ripple-outside {
+            0% {
+                box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.5), 0 0 0 0 rgba(248, 113, 113, 0.5);
+            }
+            40% {
+                box-shadow: 0 0 0 5px rgba(248, 113, 113, 0), 0 0 0 0 rgba(248, 113, 113, 0.5);
+            }
+            80% {
+                box-shadow: 0 0 0 10px rgba(248, 113, 113, 0), 0 0 0 7px rgba(248, 113, 113, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 10px rgba(248, 113, 113, 0), 0 0 0 10px rgba(248, 113, 113, 0);
+            }
+        }
+        .legend-hidden {
+            opacity: 0.5;
+            text-decoration: line-through;
+        }
+
+    </style>
+</head>
+<body class="h-full flex items-center justify-center p-4">
+    <div class="w-full max-w-4xl mx-auto">
+
+        <!-- Data Cards --><div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+            
+            <!-- Current Price Card --><div class="bg-gray-800 rounded-lg shadow-xl p-6">
+                <h2 class="text-sm font-medium text-gray-400 mb-2">Current Price <br>(ETH/USD)</h2>
+                <p id="current-price" class="text-3xl font-bold text-white">
+                    ---
+                </p>
+                <p id="price-movement" class="text-lg font-medium text-gray-500">
+                    &nbsp;
+                </p>
+            </div>
+            
+            <!-- WMA 144 Card --><div class="bg-gray-800 rounded-lg shadow-xl p-6">
+                <h2 class="text-sm font-medium text-gray-400 mb-2">WMA <br>(144)</h2>
+                <p id="wma-144" class="text-3xl font-bold text-red-400">
+                    ---
+                </p>
+                <p id="wma-movement" class="text-lg font-medium text-gray-500">
+                    &nbsp;
+                </p>
+            </div>
+
+            <!-- SMMA 5 Card --><div class="bg-gray-800 rounded-lg shadow-xl p-6">
+                <h2 class="text-sm font-medium text-gray-400 mb-2">SMMA <br>(5)</h2>
+                <p id="smma-5" class="text-3xl font-bold text-blue-400">
+                    ---
+                </p>
+                <p id="smma-movement" class="text-lg font-medium text-gray-500">
+                    &nbsp;
+                </p>
+            </div>
+
+            <!-- Volatility Card --><div id="volatility-card" class="bg-gray-800 rounded-lg shadow-xl p-6">
+                <h2 class="text-sm font-medium text-gray-400 mb-2">Volatility <br>(Chart Range)</h2>
+                <p id="volatility" class="text-3xl font-bold text-white">
+                    ---
+                </p>
+                <p id="volatility-movement" class="text-lg font-medium text-gray-500">
+                    &nbsp;
+                </p>
+            </div>
+
+            <!-- Bollinger Bands Card --><div class="bg-gray-800 rounded-lg shadow-xl p-6">
+                <h2 class="text-sm font-medium text-gray-400 mb-2">Bollinger Bands <br>(20, 2)</h2>
+                <p id="bb-upper" class="text-sm font-bold text-amber-400">
+                    --
+                </p>
+                <p id="bb-middle" class="text-sm font-bold text-purple-400">
+                    --
+                </p>
+                <p id="bb-lower" class="text-sm font-bold text-amber-400">
+                    --
+                </p>
+            </div>
+        </div>
+
+        <!-- Chart and Legend Container --><div class="bg-gray-800 rounded-lg shadow-xl p-4">
+            <div class="flex justify-between items-center mb-2">
+                <div class="flex items-center">
+                    <h3 class="text-white font-semibold">ETH/USD Futures</h3>
+                    <button id="mute-button" class="ml-6 p-1 rounded-full bg-gray-700 text-gray-400 hover:bg-gray-600 hover:text-white transition-colors duration-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" clip-rule="evenodd" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+                        </svg>
+                    </button>
+                </div>
+                <!-- Legend --><div id="chart-legend" class="flex items-center space-x-4 text-sm">
+                    <span id="price-legend" class="text-white cursor-pointer"><span class="inline-block w-3 h-3 rounded-full mr-1" style="background-color: #FFFFFF;"></span>Price</span>
+                    <span id="wma-legend" class="text-red-400 cursor-pointer"><span class="inline-block w-3 h-3 rounded-full mr-1" style="background-color: #F87171;"></span>WMA (<span id="wma-period-legend">144</span>)</span>
+                    <span id="smma-legend" class="text-blue-400 cursor-pointer"><span class="inline-block w-3 h-3 rounded-full mr-1" style="background-color: #60A5FA;"></span>SMMA (<span id="smma-period-legend">5</span>)</span>
+                    <span id="bb-legend" class="text-purple-400 cursor-pointer"><span class="inline-block w-3 h-3 rounded-full mr-1" style="background-color: #9C27B0;"></span>BB (20, 2)</span>
+                </div>
+            </div>
+            <canvas id="price-chart" class="w-full" height="300"></canvas>
+        </div>
+
+        <!-- Status Card --><div class="bg-gray-800 rounded-lg shadow-xl p-2 mt-4 flex justify-center items-center text-sm">
+            <span class="text-gray-300 font-medium mr-2">Connection Status:</span>
+            <div id="status-indicator" class="w-3 h-3 rounded-full bg-yellow-500 animate-pulse mr-2"></div>
+            <span id="status-text" class="text-yellow-400 font-semibold">Connecting...</span>
+        </div>
+
+    </div>
+
+    <audio id="price-up-sound" src="price-up-sound.mp3"></audio>
+    <audio id="price-down-sound" src="price-down-sound.mp3"></audio>
+    <audio id="alarm-sound" src="alarm.mp3"></audio>
+
+    <script>
+        // --- DOM Elements ---
+        const statusIndicator = document.getElementById('status-indicator');
+        const statusText = document.getElementById('status-text');
+        const currentPriceEl = document.getElementById('current-price');
+        const priceMovementEl = document.getElementById('price-movement');
+        const wma144El = document.getElementById('wma-144');
+        const smma5El = document.getElementById('smma-5');
+        const wmaMovementEl = document.getElementById('wma-movement');
+        const smmaMovementEl = document.getElementById('smma-movement');
+        const volatilityEl = document.getElementById('volatility');
+        const volatilityMovementEl = document.getElementById('volatility-movement');
+        const volatilityCard = document.getElementById('volatility-card');
+        const wmaPeriodLegendEl = document.getElementById('wma-period-legend');
+        const smmaPeriodLegendEl = document.getElementById('smma-period-legend');
+        const priceChartCanvas = document.getElementById('price-chart');
+        const ctx = priceChartCanvas.getContext('2d');
+        const priceUpSound = document.getElementById('price-up-sound');
+        const priceDownSound = document.getElementById('price-down-sound');
+        const alarmSound = document.getElementById('alarm-sound');
+        const muteButton = document.getElementById('mute-button');
+        const bbUpperEl = document.getElementById('bb-upper');
+        const bbMiddleEl = document.getElementById('bb-middle');
+        const bbLowerEl = document.getElementById('bb-lower');
+        let isMuted = true;
+
+        let lastPriceLevel = 0;
+
+        // --- Chart Legend ---
+        const priceLegend = document.getElementById('price-legend');
+        const wmaLegend = document.getElementById('wma-legend');
+        const smmaLegend = document.getElementById('smma-legend');
+        const bbLegend = document.getElementById('bb-legend');
+
+        // --- WebSocket & API Config ---
+        const KRAKEN_FUTURES_WS = 'wss://futures.kraken.com/ws/v1';
+        const PRODUCT_ID = 'PI_ETHUSD'; // Perpetual Index for ETH/USD (Corrected)
+        const SUBSCRIBE_MSG = {
+            event: 'subscribe',
+            feed: 'ticker',
+            product_ids: [PRODUCT_ID]
+        };
+
+        // --- Moving Average Config ---
+        const WMA_PERIOD = 144;
+        const SMMA_PERIOD = 5;
+
+        const CACHE_VERSION = '1.5'; // Incremented version
+
+        // --- Bollinger Bands Config ---
+        const BB_PERIOD = 20;
+        const BB_STD_DEV = 2;
+        
+        let bbUpper = []; // Stores Bollinger Bands upper band values
+        let bbMiddle = []; // Stores Bollinger Bands middle band values
+        let bbLower = []; // Stores Bollinger Bands lower band values
+        
+        let ws;
+        let prices = []; // Stores price history
+        let wmaValues = []; // Stores WMA values for charting
+        let smmaValues = []; // Stores SMMA values for charting
+        let prevSMMA = null; // Stores the previous SMMA value for recursive calculation
+        let lastPrice = 0; // Stores the last known price for movement indication
+        let lastWMA = 0; // Stores the last known WMA for movement indication
+        let lastSMMA = 0; // Stores the last known SMMA for movement indication
+        let lastVolatility = 0; // Stores the last known volatility for movement indication
+        let lastVolatilityLevel = 0; // Stores the last volatility level for sound alerts
+
+        let lineVisibility = {
+            price: true,
+            wma: true,
+            smma: true,
+            bb: true
+        };
+        
+        // Charting configuration
+        const MAX_DATA_POINTS = 150; // How many data points to show on the chart
+        const CHART_PADDING_LEFT = 20; // Adjusted for moving labels
+        const CHART_PADDING_RIGHT = 60; // Adjusted for moving labels
+        const CHART_PADDING_TOP = 20;
+        const CHART_PADDING_BOTTOM = 30; // Increased for X-axis labels (if added)
+        const PRICE_COLOR = '#FFFFFF'; // White
+        const WMA_COLOR = '#F87171';   // Red
+        const SMMA_COLOR = '#60A5FA';  // Blue
+        const BB_UPPER_COLOR = '#FFC107'; // Amber
+        const BB_MIDDLE_COLOR = '#9C27B0'; // Purple
+        const BB_LOWER_COLOR = '#FFC107'; // Amber
+        const GRID_COLOR = '#4B5563';  // Gray-600
+        const TEXT_COLOR = '#D1D5DB';  // Gray-300
+
+        /**
+         * Simple logging (to console only, removed from UI).
+         */
+        function log(message) {
+            console.log(`[${new Date().toLocaleTimeString()}] ${message}`);
+        }
+
+        /**
+         * Connects to the WebSocket server.
+         */
+        function connect() {
+            log(`Attempting to connect to ${KRAKEN_FUTURES_WS}...`);
+            ws = new WebSocket(KRAKEN_FUTURES_WS);
+
+            ws.onopen = () => {
+                log('Connection opened. Subscribing to ticker...');
+                statusText.textContent = 'Connected';
+                statusIndicator.classList.remove('bg-yellow-500', 'bg-red-500', 'animate-pulse');
+                statusIndicator.classList.add('bg-green-500');
+                
+                // Send subscription message
+                ws.send(JSON.stringify(SUBSCRIBE_MSG));
+                lastPriceLevel = 0;
+            };
+
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+
+                // Log challenge/subscription messages
+                if (data.event) {
+                    if (data.event === 'info') {
+                        log('Info message received.');
+                    }
+                    if (data.event === 'subscribed') {
+                        log(`Successfully subscribed to ${data.feed} for ${data.product_ids.join(', ')}`);
+                    }
+                    return; // Don't process for price
+                }
+
+                // Handle heartbeat
+                if (data.feed === 'heartbeat') {
+                    // log('Heartbeat received.');
+                    return;
+                }
+
+                // Handle ticker data
+                if (data.feed === 'ticker' && data.product_id === PRODUCT_ID) {
+                    const price = data.markPrice || data.last;
+
+                    if (price) {
+                        const numericPrice = parseFloat(price);
+                        prices.push(numericPrice);
+
+                        // Keep the prices array trimmed for performance and chart display
+                        if (prices.length > WMA_PERIOD + MAX_DATA_POINTS) {
+                            prices.shift();
+                            wmaValues.shift();
+                            smmaValues.shift();
+                            bbUpper.shift();
+                            bbMiddle.shift();
+                            bbLower.shift();
+                        }
+
+                        // Calculate MAs
+                        const wma = calculateWMA(prices, WMA_PERIOD);
+                        const smma = calculateSMMA(prices, SMMA_PERIOD);
+
+                        wmaValues.push(wma);
+                        smmaValues.push(smma);
+
+                        // Calculate Bollinger Bands
+                        const bb = calculateBollingerBands(prices, BB_PERIOD, BB_STD_DEV);
+                        bbUpper.push(bb.upper);
+                        bbMiddle.push(bb.middle);
+                        bbLower.push(bb.lower);
+
+                        // Update the UI & Chart
+                        updateUI(numericPrice, wma, smma, bb);
+                        drawChart();
+
+                        lastPrice = numericPrice;
+                        if (wma !== null) lastWMA = wma;
+                        if (smma !== null) lastSMMA = smma;
+
+                        // Cache the last 200 data points
+                        localStorage.setItem('prices', JSON.stringify(prices.slice(-200)));
+                        localStorage.setItem('wmaValues', JSON.stringify(wmaValues.slice(-200)));
+                        localStorage.setItem('smmaValues', JSON.stringify(smmaValues.slice(-200)));
+                        localStorage.setItem('bbUpper', JSON.stringify(bbUpper.slice(-200)));
+                        localStorage.setItem('bbMiddle', JSON.stringify(bbMiddle.slice(-200)));
+                        localStorage.setItem('bbLower', JSON.stringify(bbLower.slice(-200)));
+
+                        // Check for price cross
+                        const currentPriceLevel = Math.floor(numericPrice / 100);
+                        if (!isMuted && lastPriceLevel !== 0 && currentPriceLevel !== lastPriceLevel) {
+                            if (currentPriceLevel > lastPriceLevel) {
+                                priceUpSound.play();
+                            } else {
+                                priceDownSound.play();
+                            }
+                        }
+                        lastPriceLevel = currentPriceLevel;
+                    }
+                } else {
+                    // console.log(`Received:`, data); // For debugging other messages
+                }
+            };
+
+            ws.onclose = () => {
+                log('Connection closed. Attempting to reconnect in 5s...');
+                statusText.textContent = 'Disconnected';
+                statusIndicator.classList.remove('bg-green-500', 'bg-yellow-500');
+                statusIndicator.classList.add('bg-red-500', 'animate-pulse');
+                
+                // Clear state for fresh start
+                prices = [];
+                wmaValues = [];
+                smmaValues = [];
+                bbUpper = [];
+                bbMiddle = [];
+                bbLower = [];
+                prevSMMA = null;
+                lastPrice = 0;
+                lastWMA = 0;
+                lastSMMA = 0;
+                lastVolatility = 0;
+                lastPriceLevel = 0;
+                
+                // Clear chart
+                ctx.clearRect(0, 0, priceChartCanvas.width, priceChartCanvas.height);
+
+                // Try to reconnect
+                setTimeout(connect, 5000);
+            };
+
+            ws.onerror = (error) => {
+                log(`WebSocket Error: ${error.message}`);
+                console.error('WebSocket Error:', error);
+                ws.close(); // This will trigger the onclose reconnect logic
+            };
+        }
+
+        /**
+         * Updates the UI elements (price, MAs).
+         */
+        function updateUI(currentPrice, wma, smma, bb) {
+            // --- 1. Update Current Price ---
+            const priceString = currentPrice.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+            currentPriceEl.textContent = priceString;
+
+            // Update price movement indicator
+            if (lastPrice !== 0) {
+                if (currentPrice > lastPrice) {
+                    priceMovementEl.textContent = '▲';
+                    priceMovementEl.classList.remove('text-red-400', 'text-gray-500');
+                    priceMovementEl.classList.add('text-green-400');
+                } else if (currentPrice < lastPrice) {
+                    priceMovementEl.textContent = '▼';
+                    priceMovementEl.classList.remove('text-green-400', 'text-gray-500');
+                    priceMovementEl.classList.add('text-red-400');
+                } else {
+                    priceMovementEl.textContent = '─';
+                    priceMovementEl.classList.remove('text-green-400', 'text-red-400');
+                    priceMovementEl.classList.add('text-gray-500');
+                }
+            }
+
+            // --- 2. Update WMA (144) ---
+            if (wma !== null) {
+                wma144El.textContent = wma.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+                if (lastWMA !== 0) {
+                    if (wma > lastWMA) {
+                        wmaMovementEl.textContent = '▲';
+                        wmaMovementEl.classList.remove('text-red-400', 'text-gray-500');
+                        wmaMovementEl.classList.add('text-green-400');
+                    } else if (wma < lastWMA) {
+                        wmaMovementEl.textContent = '▼';
+                        wmaMovementEl.classList.remove('text-green-400', 'text-gray-500');
+                        wmaMovementEl.classList.add('text-red-400');
+                    } else {
+                        wmaMovementEl.textContent = '─';
+                        wmaMovementEl.classList.remove('text-green-400', 'text-red-400');
+                        wmaMovementEl.classList.add('text-gray-500');
+                    }
+                }
+            } else {
+                wma144El.textContent = 'Calc...';
+            }
+
+            // --- 3. Update SMMA (5) ---
+            if (smma !== null) {
+                smma5El.textContent = smma.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+                if (lastSMMA !== 0) {
+                    if (smma > lastSMMA) {
+                        smmaMovementEl.textContent = '▲';
+                        smmaMovementEl.classList.remove('text-red-400', 'text-gray-500');
+                        smmaMovementEl.classList.add('text-green-400');
+                    } else if (smma < lastSMMA) {
+                        smmaMovementEl.textContent = '▼';
+                        smmaMovementEl.classList.remove('text-green-400', 'text-gray-500');
+                        smmaMovementEl.classList.add('text-red-400');
+                    } else {
+                        smmaMovementEl.textContent = '─';
+                        smmaMovementEl.classList.remove('text-green-400', 'text-red-400');
+                        smmaMovementEl.classList.add('text-gray-500');
+                    }
+                }
+            } else {
+                smma5El.textContent = 'Calc...';
+            }
+
+            // --- 4. Update Bollinger Bands ---
+            if (bb.upper !== null) {
+                bbUpperEl.textContent = bb.upper.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+                bbMiddleEl.textContent = bb.middle.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+                bbLowerEl.textContent = bb.lower.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+            } else {
+                bbUpperEl.textContent = 'Calc...';
+                bbMiddleEl.textContent = '';
+                bbLowerEl.textContent = '';
+            }
+        }
+
+        /**
+         * Calculates the Weighted Moving Average (WMA).
+         */
+        function calculateWMA(priceHistory, period) {
+            if (priceHistory.length < period) {
+                return null; 
+            }
+
+            let weightedSum = 0;
+            const denominator = (period * (period + 1)) / 2; 
+
+            const recentPrices = priceHistory.slice(-period);
+
+            for (let i = 0; i < recentPrices.length; i++) {
+                const weight = i + 1; 
+                weightedSum += recentPrices[i] * weight;
+            }
+
+            return weightedSum / denominator;
+        }
+
+        /**
+         * Calculates the Smoothed Moving Average (SMMA).
+         * This is a recursive calculation where the first SMMA is an SMA.
+         */
+        function calculateSMMA(priceHistory, period) {
+            if (priceHistory.length < period) {
+                return null;
+            }
+
+            if (prevSMMA === null) {
+                if (priceHistory.length >= period) {
+                    let sum = 0;
+                    const initialPricesForSMA = priceHistory.slice(-period);
+                    for (let i = 0; i < initialPricesForSMA.length; i++) {
+                        sum += initialPricesForSMA[i];
+                    }
+                    prevSMMA = sum / period;
+                    return prevSMMA;
+                }
+                return null;
+            }
+
+            const newPrice = priceHistory[priceHistory.length - 1];
+            const currentSMMA = ((prevSMMA * (period - 1)) + newPrice) / period;
+            prevSMMA = currentSMMA;
+            return currentSMMA;
+        }
+
+        /**
+         * Calculates the Bollinger Bands.
+         */
+        function calculateBollingerBands(priceHistory, period, stdDev) {
+            if (priceHistory.length < period) {
+                return { upper: null, middle: null, lower: null };
+            }
+
+            const recentPrices = priceHistory.slice(-period);
+            const middle = recentPrices.reduce((a, b) => a + b, 0) / period;
+            const variance = recentPrices.map(p => Math.pow(p - middle, 2)).reduce((a, b) => a + b, 0) / period;
+            const standardDeviation = Math.sqrt(variance);
+
+            const upper = middle + (standardDeviation * stdDev);
+            const lower = middle - (standardDeviation * stdDev);
+
+            return { upper, middle, lower };
+        }
+
+        /**
+         * Draws the price chart on the canvas.
+         */
+        function drawChart() {
+            ctx.clearRect(0, 0, priceChartCanvas.width, priceChartCanvas.height);
+
+            const drawableWidth = priceChartCanvas.width - CHART_PADDING_LEFT - CHART_PADDING_RIGHT;
+            const drawableHeight = priceChartCanvas.height - CHART_PADDING_TOP - CHART_PADDING_BOTTOM;
+
+            // Get the data points relevant for charting (up to MAX_DATA_POINTS)
+            const chartPrices = prices.slice(-MAX_DATA_POINTS);
+
+            if (chartPrices.length < 1) { // Need at least one point to even show "Waiting"
+                ctx.fillStyle = TEXT_COLOR;
+                ctx.font = '16px Inter';
+                ctx.textAlign = 'center';
+                ctx.fillText('Waiting for data...', priceChartCanvas.width / 2, priceChartCanvas.height / 2);
+                return;
+            }
+
+            const chartWMA = wmaValues.slice(-MAX_DATA_POINTS);
+            const chartSMMA = smmaValues.slice(-MAX_DATA_POINTS);
+
+            const chartBBUpper = bbUpper.slice(-MAX_DATA_POINTS);
+            const chartBBMiddle = bbMiddle.slice(-MAX_DATA_POINTS);
+            const chartBBLower = bbLower.slice(-MAX_DATA_POINTS);
+
+            // Determine min/max values for scaling based on VISIBLE data
+            let allValues = [];
+            if (lineVisibility.price) allValues.push(...chartPrices.filter(v => v !== null));
+            if (lineVisibility.wma) allValues.push(...chartWMA.filter(v => v !== null));
+            if (lineVisibility.smma) allValues.push(...chartSMMA.filter(v => v !== null));
+            if (lineVisibility.bb) {
+                allValues.push(...chartBBUpper.filter(v => v !== null));
+                allValues.push(...chartBBMiddle.filter(v => v !== null));
+                allValues.push(...chartBBLower.filter(v => v !== null));
+            }
+            
+            if (allValues.length === 0) {
+                 ctx.fillStyle = TEXT_COLOR;
+                ctx.font = '16px Inter';
+                ctx.textAlign = 'center';
+                ctx.fillText('No data to display. Toggle a legend item.', priceChartCanvas.width / 2, priceChartCanvas.height / 2);
+                return;
+            }
+
+            let minVal = Math.min(...allValues);
+            let maxVal = Math.max(...allValues);
+
+            const volatility = maxVal - minVal;
+            volatilityEl.textContent = volatility.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+
+            if (lastVolatility !== 0) {
+                if (volatility > lastVolatility) {
+                    volatilityMovementEl.textContent = '▲';
+                    volatilityMovementEl.classList.remove('text-red-400', 'text-gray-500');
+                    volatilityMovementEl.classList.add('text-green-400');
+                } else if (volatility < lastVolatility) {
+                    volatilityMovementEl.textContent = '▼';
+                    volatilityMovementEl.classList.remove('text-green-400', 'text-gray-500');
+                    volatilityMovementEl.classList.add('text-red-400');
+                } else {
+                    volatilityMovementEl.textContent = '─';
+                    volatilityMovementEl.classList.remove('text-green-400', 'text-red-400');
+                    volatilityMovementEl.classList.add('text-gray-500');
+                }
+            }
+
+            // Pulsating shadow effect
+            volatilityCard.classList.remove('pulse-green', 'pulse-yellow', 'pulse-orange', 'pulse-red', 'pulse-red-fast', 'pulse-red-faster', 'pulse-purple');
+            if (volatility >= 10 && volatility < 20) {
+                volatilityCard.classList.add('pulse-green');
+            } else if (volatility >= 20 && volatility < 30) {
+                volatilityCard.classList.add('pulse-yellow');
+            } else if (volatility >= 30 && volatility < 40) {
+                volatilityCard.classList.add('pulse-orange');
+            } else if (volatility >= 40 && volatility < 50) {
+                volatilityCard.classList.add('pulse-red');
+            } else if (volatility >= 50 && volatility < 75) {
+                volatilityCard.classList.add('pulse-red-fast');
+            } else if (volatility >= 75 && volatility < 100) {
+                volatilityCard.classList.add('pulse-red-faster');
+            } else if (volatility >= 100) {
+                volatilityCard.classList.add('pulse-purple');
+            }
+
+            // Sound alert for volatility levels
+            const volatilityValue = volatility;
+            let currentVolatilityLevel = 0;
+            if (volatilityValue >= 100) {
+                currentVolatilityLevel = 100;
+            } else if (volatilityValue >= 75) {
+                currentVolatilityLevel = 75;
+            } else if (volatilityValue >= 50) {
+                currentVolatilityLevel = 50;
+            }
+
+            if (!isMuted && currentVolatilityLevel > lastVolatilityLevel) {
+                alarmSound.play();
+            }
+            lastVolatilityLevel = currentVolatilityLevel;
+            lastVolatility = volatility;
+            
+            // Add a small buffer to min/max for better visualization
+            const valueRange = maxVal - minVal;
+            const buffer = valueRange * 0.1 || 0.1; // Ensure buffer is at least 0.1 if range is 0
+            const displayMin = minVal - buffer;
+            const displayMax = maxVal + buffer;
+            const displayRange = displayMax - displayMin;
+
+            if (displayRange === 0) { // Avoid division by zero, set a default small range
+                minVal -= 0.5;
+                maxVal += 0.5;
+                displayMin = minVal;
+                displayMax = maxVal;
+            }
+            const finalDisplayRange = displayMax - displayMin;
+
+            // Function to scale a price value to a Y-coordinate on the canvas
+            const scaleY = (value) => {
+                // Map value from [displayMin, displayMax] to [drawableHeight, 0]
+                // and then shift by CHART_PADDING_TOP
+                return CHART_PADDING_TOP + drawableHeight - ((value - displayMin) / finalDisplayRange) * drawableHeight;
+            };
+
+            // Function to scale an index (data point position) to an X-coordinate
+            const scaleX = (index, totalPoints) => {
+                const offset = MAX_DATA_POINTS - totalPoints;
+                const divisor = MAX_DATA_POINTS > 1 ? (MAX_DATA_POINTS - 1) : 1;
+                return CHART_PADDING_LEFT + ((index + offset) / divisor) * drawableWidth;
+            };
+
+            // --- Draw Grid and Labels ---
+
+            ctx.strokeStyle = GRID_COLOR;
+            ctx.lineWidth = 0.5;
+            ctx.fillStyle = TEXT_COLOR;
+            ctx.font = '12px Inter';
+
+            // Y-axis labels and horizontal grid lines
+            const numHorizontalLines = 5;
+            ctx.textAlign = 'left';
+            for (let i = 0; i <= numHorizontalLines; i++) {
+                const value = displayMin + (i / numHorizontalLines) * finalDisplayRange;
+                const y = scaleY(value);
+
+                const nearestHundred = Math.round(value / 100) * 100;
+                const isNearRound = Math.abs(value - nearestHundred) < (finalDisplayRange / numHorizontalLines) / 2;
+
+                ctx.beginPath();
+                ctx.moveTo(CHART_PADDING_LEFT, y);
+                ctx.lineTo(CHART_PADDING_LEFT + drawableWidth, y);
+
+                if (isNearRound) {
+                    ctx.strokeStyle = '#F87171';
+                } else {
+                    ctx.strokeStyle = GRID_COLOR;
+                }
+
+                ctx.stroke();
+                ctx.fillText(value.toFixed(2), priceChartCanvas.width - CHART_PADDING_RIGHT + 5, y + 3); // Label outside padding
+            }
+            ctx.strokeStyle = GRID_COLOR; // Reset to default
+            
+            // X-axis labels (simplified, just index markers for now)
+            ctx.textAlign = 'center';
+            const numVerticalLines = 5;
+            for (let i = 0; i <= numVerticalLines; i++) {
+                const index = Math.floor((i / numVerticalLines) * (chartPrices.length - 1));
+                if (index < 0) continue; // Handle case where chartPrices.length is 0 or 1
+                const x = scaleX(index, chartPrices.length);
+                ctx.beginPath();
+                ctx.moveTo(x, CHART_PADDING_TOP);
+                ctx.lineTo(x, CHART_PADDING_TOP + drawableHeight);
+                ctx.stroke();
+                // Optional: Add a time label here if we stored timestamps
+                // ctx.fillText(`-${chartPrices.length - index} pts`, x, CHART_PADDING_TOP + drawableHeight + 15);
+            }
+
+            // --- Draw Lines ---
+
+            // Helper function to draw a line
+            const drawLine = (data, color, totalPointsForXScale) => {
+                if (data.length < 1) return; // Need at least one point to draw a dot or line segment
+
+                ctx.beginPath();
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2;
+
+                // Find the first valid data point
+                let firstValidIndex = -1;
+                for(let i = 0; i < data.length; i++) {
+                    if (data[i] !== null) {
+                        firstValidIndex = i;
+                        break;
+                    }
+                }
+
+                if (firstValidIndex === -1) return; // No valid data points
+
+                ctx.moveTo(scaleX(firstValidIndex, totalPointsForXScale), scaleY(data[firstValidIndex]));
+
+                for (let i = firstValidIndex + 1; i < data.length; i++) {
+                    if (data[i] !== null) { 
+                        ctx.lineTo(scaleX(i, totalPointsForXScale), scaleY(data[i]));
+                    } else {
+                        // If there's a null, lift the pen and try to start a new segment after the null
+                        ctx.stroke();
+                        ctx.beginPath();
+                        ctx.strokeStyle = color;
+                        ctx.lineWidth = 2;
+                        // Find the next valid point to move to
+                        let nextValidIndex = -1;
+                        for (let j = i + 1; j < data.length; j++) {
+                            if (data[j] !== null) {
+                                nextValidIndex = j;
+                                break;
+                            }
+                        }
+                        if (nextValidIndex !== -1) {
+                            ctx.moveTo(scaleX(nextValidIndex, totalPointsForXScale), scaleY(data[nextValidIndex]));
+                            i = nextValidIndex -1; // Continue from here on next loop iteration
+                        } else {
+                            break; // No more valid points after this null
+                        }
+                    }
+                }
+                ctx.stroke();
+            };
+
+            // Draw Price
+            if (lineVisibility.price) drawLine(chartPrices, PRICE_COLOR, chartPrices.length);
+
+            // Draw WMA
+            if (lineVisibility.wma) drawLine(chartWMA, WMA_COLOR, chartPrices.length);
+
+            // Draw SMMA
+            if (lineVisibility.smma) drawLine(chartSMMA, SMMA_COLOR, chartPrices.length);
+
+            // Draw Bollinger Bands
+            if (lineVisibility.bb) {
+                drawLine(chartBBUpper, BB_UPPER_COLOR, chartPrices.length);
+                drawLine(chartBBMiddle, BB_MIDDLE_COLOR, chartPrices.length);
+                drawLine(chartBBLower, BB_LOWER_COLOR, chartPrices.length);
+            }
+
+        }
+
+        // --- Initial Call ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const cachedVersion = localStorage.getItem('cacheVersion');
+            if (cachedVersion !== CACHE_VERSION) {
+                localStorage.clear();
+                localStorage.setItem('cacheVersion', CACHE_VERSION);
+            }
+
+            // Load cached data
+            const cachedPrices = JSON.parse(localStorage.getItem('prices'));
+            const cachedWmaValues = JSON.parse(localStorage.getItem('wmaValues'));
+            const cachedSmmaValues = JSON.parse(localStorage.getItem('smmaValues'));
+            const cachedBbUpper = JSON.parse(localStorage.getItem('bbUpper'));
+            const cachedBbMiddle = JSON.parse(localStorage.getItem('bbMiddle'));
+            const cachedBbLower = JSON.parse(localStorage.getItem('bbLower'));
+
+            if (cachedPrices && cachedPrices.length > 0 &&
+                cachedWmaValues && cachedSmmaValues && cachedBbUpper && cachedBbMiddle && cachedBbLower) {
+                
+                prices = cachedPrices;
+                wmaValues = cachedWmaValues;
+                smmaValues = cachedSmmaValues;
+                bbUpper = cachedBbUpper;
+                bbMiddle = cachedBbMiddle;
+                bbLower = cachedBbLower;
+                drawChart();
+            }
+            // No else block here, as we want to connect even if cache is empty
+
+            // Set canvas size for responsiveness, then connect
+            priceChartCanvas.width = priceChartCanvas.offsetWidth; 
+            connect();
+            // Update legend periods
+            wmaPeriodLegendEl.textContent = WMA_PERIOD;
+            smmaPeriodLegendEl.textContent = SMMA_PERIOD;
+            // Redraw chart if window resizes
+            window.addEventListener('resize', () => {
+                priceChartCanvas.width = priceChartCanvas.offsetWidth;
+                drawChart();
+            });
+
+            muteButton.addEventListener('click', () => {
+                isMuted = !isMuted;
+                if (isMuted) {
+                    muteButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" clip-rule="evenodd" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+                    </svg>`;
+                    muteButton.classList.add('icon-red', 'ripple-effect');
+                } else {
+                    muteButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                    </svg>`;
+                    muteButton.classList.remove('icon-red', 'ripple-effect');
+                    // Unlock audio
+                    priceUpSound.play().catch(() => {});
+                    priceUpSound.pause();
+                    priceDownSound.play().catch(() => {});
+                    priceDownSound.pause();
+                    alarmSound.play().catch(() => {});
+                    alarmSound.pause();
+                }
+            });
+
+            // Set initial state of mute button
+            if (isMuted) {
+                muteButton.classList.add('icon-red', 'ripple-effect');
+            }
+
+            // --- Legend Click Handlers ---
+            priceLegend.addEventListener('click', () => {
+                lineVisibility.price = !lineVisibility.price;
+                priceLegend.classList.toggle('legend-hidden');
+                drawChart();
+            });
+            wmaLegend.addEventListener('click', () => {
+                lineVisibility.wma = !lineVisibility.wma;
+                wmaLegend.classList.toggle('legend-hidden');
+                drawChart();
+            });
+            smmaLegend.addEventListener('click', () => {
+                lineVisibility.smma = !lineVisibility.smma;
+                smmaLegend.classList.toggle('legend-hidden');
+                drawChart();
+            });
+            bbLegend.addEventListener('click', () => {
+                lineVisibility.bb = !lineVisibility.bb;
+                bbLegend.classList.toggle('legend-hidden');
+                drawChart();
+            });
+
+        });
+
+    </script>
+</body>
+</html>
